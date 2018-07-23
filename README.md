@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # rohitgpt.github.io
 Git page
 =======
@@ -39,4 +38,3 @@ Your Pages site will use the layout and styles from the Jekyll theme you have se
 ### Support or Contact
 
 Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
->>>>>>> f3a2cd7022e1031dabf01643cc0ab8b7b0005492
