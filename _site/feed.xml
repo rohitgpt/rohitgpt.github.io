@@ -1,0 +1,1156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>¬</title>
+    <description>Atul's Programming Journals. A blog where I explore programming &amp; Design
+</description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Fri, 03 Sep 2021 06:48:25 +0000</pubDate>
+    <lastBuildDate>Fri, 03 Sep 2021 06:48:25 +0000</lastBuildDate>
+    <generator>Jekyll v4.0.0</generator>
+    
+      <item>
+        <title>Finding Mona Lisa in the Game of Life</title>
+        <description>&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/lisa.webm&quot; type=&quot;video/webm&quot; /&gt; &lt;/video&gt;
+
+&lt;cap&gt;This video might take a few seconds to load. Please squint for best results :).&lt;/cap&gt;
+
+&lt;p&gt;The results of this experiment are not exactly close to my target as you can see, but I thought it was worth a blog post anyway. There was this rough idea I’ve been thinking about in &lt;a href=&quot;https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life&quot;&gt;Conway’s Game of Life&lt;/a&gt; for a really long time.&lt;/p&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot; data-conversation=&quot;none&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;I wonder if it's possible to use some kind of stochastic algorithm that gives you an initial state which forms legible text after many cycles.&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1291586306489761792?ref_src=twsrc%5Etfw&quot;&gt;August 7, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;I came across &lt;a href=&quot;https://kevingal.com/blog/mona-lisa-gol.html&quot;&gt;an article&lt;/a&gt; of the same title by Kevin Galligan recently and I thought I could do something similar using a different approach. What if instead of using SAT Solvers, I use some kind of heuristic algorithm that could somehow “program” a large world of Game of Life to display an image after a few generations?&lt;/p&gt;
+
+&lt;p&gt;There are other ways of achieving this. One is by placing still life states at specific pixels as described in this &lt;a href=&quot;https://codegolf.stackexchange.com/questions/38573/paint-a-still-life-or-a-moving-one-draw-an-image-in-the-game-of-life&quot;&gt;codegolf question&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;What I’m thinking of is to display Mona Lisa for a single frame/generation of ‘non-still’ Game of Life.&lt;/p&gt;
+
+&lt;h1 id=&quot;algorithm&quot;&gt;Algorithm&lt;/h1&gt;
+
+&lt;p&gt;I began working on a proof of concept using the hill climbing algorithm. The idea was very simple. Iteratively modify a random 2D Game of Life state until it’s Nth generation looks similar to Mona Lisa. Here’s the full algorithm.&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    best_score := infinity
+    target := mona lisa with dimensions m x n
+    canvas := random matrix of m x n
+    best_result := canvas
+    do
+        modified_canvas := Copy of canvas with a single random cell inverted
+        nth_modified_canvas := Run N generations of Game of Life modified_canvas
+        Compute a score of how close nth_modified_canvas is with target
+        if score &amp;lt; best_score then
+        	best_score := score
+            best_result := modified_canvas
+        canvas := best_result
+    while(max_iterations limit passed or best_score &amp;lt; threshold)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I hacked up a single core prototype.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def modify(canvas, shape):
+    x,y = shape
+    px = int(np.random.uniform(x+1))-1
+    py = int(np.random.uniform(y+1))-1
+    canvas[px][py] = not canvas[px][py]
+    return canvas
+
+def rmse(predictions,targets):
+    return np.sqrt(np.mean((predictions-targets)**2))
+
+while best_score&amp;gt;limit:
+    canvases = np.tile(np.copy(best_seed), (batch_size, 1, 1))
+    rms_errors = []
+    for canvas in range(len(canvases)):
+        canvases[canvas] = modify(states[state], (m,n))
+        rmse_val = rmse(target, nth_generation(np.copy(canvases[canvas])))
+        rms_errors.append(rmse_val)
+    lowest = min(rms_errors)
+    if lowest &amp;lt; best_score:
+        best_score = lowest
+        best_result = canvases[rms_errors.index(lowest)]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Hill Climbing works by finding the closest neighboring state to a current state with the least error from a ‘target_state’ (Mona Lisa). The way I find the closest neighbor in every step is to create a copy of the best solution we have so far and invert a random cell. This change is small enough that we don’t risk stepping over any local minima. Also we use root mean square error metric to compare the best state and the target. Other error metrics can be experimented with, but for this problem, I found that RMSE was sufficient.&lt;/p&gt;
+
+&lt;p&gt;After a few days of CPU time(!), I was able to obtain something that resembled Mona Lisa after running 4 generations of life.&lt;/p&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/lisa_cpu.webm&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;p&gt;It was reassuring that my algorithm did indeed work, but I realize I made a bunch of mistakes and of course it’s not really scalable for larger images or fast.&lt;/p&gt;
+
+&lt;h1 id=&quot;preprocessing&quot;&gt;Preprocessing&lt;/h1&gt;
+
+&lt;p&gt;Target Mona Lisa against which our random state was compared with was the medium resolution version taken from Wikipedia and converted to monochrome using PIL’s &lt;code class=&quot;highlighter-rouge&quot;&gt;Image.open('target.png').convert('L')&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/screenshot-from-2021-02-23-18-38-08-copy.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;cap&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Mona_Lisa#/media/File:Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg&quot;&gt;Taken from wikipedia&lt;/a&gt;&lt;/cap&gt;
+
+&lt;p&gt;When you’re comparing against boolean variables, It’s better that we the target as a binary matrix rather than the whole grayscale range.&lt;/p&gt;
+
+&lt;p&gt;In this attempt, I simply rounded these grayscale values to 0s and 1s. This was a mistake as it washed away a lot of details.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/screenshot-from-2021-02-23-18-39-11.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We could just not round at all and compare against the grayscale version, but there is a better way.&lt;/p&gt;
+
+&lt;h1 id=&quot;garden-of-eden-states&quot;&gt;Garden of Eden States&lt;/h1&gt;
+
+&lt;p&gt;Not every random matrix of 0s and 1s are a valid Game of Life state. States that can never be an nth generation (n&amp;gt;0) of any Cellular Automata are called Garden of Edens. It is almost impossible that our monochrome-rounded Mona Lisa is a valid Game of Life generation. We can only hope to have a solution that’s approximately close to the target.&lt;/p&gt;
+
+&lt;p&gt;This is a portion of the 4th generation of the state we just prepared.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/screenshot-from-2021-02-23-19-08-47.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Judging by the texture, the way life patterns evolve and from just experimenting with images, I found that comparing against a 1-bit dithered version the target should improve the quality of results.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/screenshot-from-2021-02-23-19-04-26.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;cap&gt;1-bit Dithering on Mona Lisa&lt;/cap&gt;
+
+&lt;p&gt;Dithered image has a somewhat even distribution of 0 and 1 cells which is somewhat close to what a randomly initialized Game of Life state will look like after a few generations. This property is also maintained when you scale up the image, (which we’ll optimize for soon).&lt;/p&gt;
+
+&lt;p&gt;We could do this using PIL (it’s &lt;a href=&quot;https://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering&quot;&gt;Floyd–Steinberg dithering&lt;/a&gt;) using &lt;code class=&quot;highlighter-rouge&quot;&gt;Image.open('target.png').convert('1')&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/screenshot-from-2021-02-23-18-54-34.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Also you can see from the last result, it’s impossible to get a continuous array of white cells because they will be killed off by the overpopulation rule. Completely dark areas are stable in life. The end result will be a higher contrast, but slightly darkened version of Mona Lisa. At higher resolutions, this effect is not as apparent.&lt;/p&gt;
+
+&lt;h1 id=&quot;vectorization-with-jax&quot;&gt;Vectorization with JAX&lt;/h1&gt;
+
+&lt;p&gt;The single core unvectorized version is extremely slow. I tried running this in both my 8th gen Core i7 and the Google Colab CPU machines, but you need to wait for hours/days (depending on target resolution) to get something that resembles the original.&lt;/p&gt;
+
+&lt;p&gt;Fortunately, This problem is well suited for parallelization.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/google/jax/master/images/jax_logo_250px.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;JAX is a python library that lets you use a version of numpy and compile it to highly vectorized code that can be run on a GPU/TPU. We need to rework this algorithm for a GPU.&lt;/p&gt;
+
+&lt;p&gt;GPUs generally suited to high-throughput type computations that has good data-parallelism. We need to exploit the SIMD (Single Instruction Multiple Data) architecture to gain faster execution speeds.&lt;/p&gt;
+
+&lt;p&gt;We extrude the &lt;code class=&quot;highlighter-rouge&quot;&gt;target&lt;/code&gt;(Mona Lisa) and &lt;code class=&quot;highlighter-rouge&quot;&gt;canvas&lt;/code&gt;(initial random state) to 3rd dimension with 3rd dimension being &lt;code class=&quot;highlighter-rouge&quot;&gt;batch_size&lt;/code&gt; long tensor loafs.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/untssitled-copy.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;cap&gt;Initial canvas will be completely random(unlike the figure).&lt;/cap&gt;
+
+&lt;p&gt;We set &lt;code class=&quot;highlighter-rouge&quot;&gt;best_canvas&lt;/code&gt; to the initial random canvas before our hill climbing loop.&lt;/p&gt;
+
+&lt;p&gt;Also, for every loop iteration, we need to produce a random tensor called mutator(same shape as &lt;code class=&quot;highlighter-rouge&quot;&gt;target&lt;/code&gt;) with this property: Each slice should have all zeros except a single one place at a random location.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/untssitled-3rd-copy.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Something like&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array([[[1, 0],
+        [0, 0],
+        [0, 0]],
+
+       [[1, 0],
+        [0, 0],
+        [0, 0]],
+
+       [[0, 0],
+        [0, 1],
+        [0, 0]],
+
+       [[0, 1],
+        [0, 0],
+        [0, 0]],
+
+       [[1, 0],
+        [0, 0],
+        [0, 0]]])
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;cap&gt;&lt;br /&gt;Example mutator with shape 5, 3, 2. batch_size being 5&lt;/cap&gt;
+
+&lt;p&gt;The idea is that in every loop, we use the mutator to calculate the nearest set of neighboring states from our best_canvas like this &lt;code class=&quot;highlighter-rouge&quot;&gt;canvas = (best_canvas + mutator)%2&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;We compute N generations of game of life across every slice of this modified canvas. Then, we do a 3D RMSE(mean being calculated for the slice only) on the Nth generation canvas against Mona Lisa, and find the slice with the lowest error.
+This is slice is then extruded and set to best_canvas and the loop repeats till a finite number of iterations pass.&lt;/p&gt;
+
+&lt;h2 id=&quot;code&quot;&gt;Code&lt;/h2&gt;
+
+&lt;p&gt;The notebook for this project is &lt;a href=&quot;https://github.com/avinayak/mona_lisa_gol_jax/blob/main/mona_lisa_overdrive.ipynb&quot;&gt;available in github&lt;/a&gt;. I’ll explain what every block is doing in this section. If you want to see results, skip to the end of the article.&lt;/p&gt;
+
+&lt;p&gt;The core of this project, the game of life function is actually taken from &lt;a href=&quot;http://www.bnikolic.co.uk/blog/python/jax/2020/04/19/game-of-life-jax.html&quot;&gt;this post&lt;/a&gt;. Thank you  Bojan Nikolic :). I followed his convention of importing &lt;code class=&quot;highlighter-rouge&quot;&gt;jax.numpy&lt;/code&gt; as &lt;code class=&quot;highlighter-rouge&quot;&gt;N&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;jax.lax&lt;/code&gt; as &lt;code class=&quot;highlighter-rouge&quot;&gt;L&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;%matplotlib inline 
+import jax
+N=jax.numpy
+L=jax.lax
+from jax.experimental import loops
+from jax import ops
+import matplotlib.pyplot as plt
+import numpy as onp
+import time
+from PIL import Image 
+from google.colab import files
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, &lt;code class=&quot;highlighter-rouge&quot;&gt;wget&lt;/code&gt; Mona Lisa&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;!wget -O target.png https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/483px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg?download
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is not a crazy high res version.It’s only 483px wide.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;batch_size = 100
+image_file = Image.open(&quot;target.png&quot;)
+image_file = image_file.convert('1')
+lisa = N.array(image_file, dtype=N.int32)
+width,height = lisa.shape
+lisa_loaf = onp.repeat(lisa[onp.newaxis, :, :,], batch_size, axis = 0)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This section dithers Mona Lisa using the and extrudes it to &lt;code class=&quot;highlighter-rouge&quot;&gt;batch_size&lt;/code&gt; length.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;key = jax.random.PRNGKey(42)
+canvas_loaf = jax.random.randint(key, (batch_size, width, height), 0, 2, dtype= N.int32) #for tests, initialize random lisa
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here, we’re seeding JAX PRNG(will be explained soon). Also we’re creating the initial random &lt;code class=&quot;highlighter-rouge&quot;&gt;canvas_loaf&lt;/code&gt; with integers 0 and 1.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@jax.jit
+def rgen(a):
+    # This reduction over-counts the neighbours of live cells since it includes the
+    # central cell itself. Subtract out the array to correct for this.
+    nghbrs=L.reduce_window(a, 0, L.add, (3,3), (1,1), &quot;SAME&quot;)-a
+    birth=N.logical_and(a==0, nghbrs==3)
+    underpop=N.logical_and(a==1, nghbrs&amp;lt;2)
+    overpop=N.logical_and(a==1, nghbrs&amp;gt;3)
+    death=N.logical_or(underpop, overpop)
+
+    na=L.select(birth,
+                N.ones(a.shape, N.int32),
+                a)
+
+    na=L.select(death,
+                N.zeros(a.shape, N.int32),
+                na)
+    return na
+
+vectorized_rgen = jax.vmap(rgen)
+
+@jax.jit
+def nv_rgen(state):
+  for _ in range(n_generations):
+      state = vectorized_rgen(state)
+  return state
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Please read &lt;a href=&quot;http://www.bnikolic.co.uk/blog/python/jax/2020/04/19/game-of-life-jax.html&quot;&gt;B. Nikolc’s post&lt;/a&gt; for an explanation for &lt;code class=&quot;highlighter-rouge&quot;&gt;rgen&lt;/code&gt; function, which runs a single generation of Game of Life.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;jax.vmap&lt;/code&gt; lets us creates a function which maps an input function over argument axes (vectorize). This lets us run a generation of game of life across every slice in our canvas.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;nv_rgen&lt;/code&gt;  runs N generations of life on our canvas.&lt;/p&gt;
+
+&lt;p&gt;Also, &lt;code class=&quot;highlighter-rouge&quot;&gt;@jax.jit&lt;/code&gt; python decorator just tells the compiler to jit compile this function. I’m not sure if we there was any improvement in this case as &lt;code class=&quot;highlighter-rouge&quot;&gt;nv_rgen&lt;/code&gt; is simply composed of other jitted functions.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def mutate_nj(b, w, h, subkey):
+  a = jax.random.normal(subkey, (b, w, h))
+  return (a == a.max(axis=(1,2))[:,None,None]).astype(int)
+
+mutate = jax.jit(mutate_nj, static_argnums=(0,1,2))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;mutate_nj&lt;/code&gt;(nj = non jitted) generates the mutator tensor we talked about before. It generates this using &lt;code class=&quot;highlighter-rouge&quot;&gt;jax.random.normal&lt;/code&gt; and sets max of every slice to &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt; and rest to &lt;code class=&quot;highlighter-rouge&quot;&gt;0&lt;/code&gt;. I’ll explain the &lt;code class=&quot;highlighter-rouge&quot;&gt;subkey&lt;/code&gt; argument soon.&lt;/p&gt;
+
+&lt;p&gt;We jit this function as &lt;code class=&quot;highlighter-rouge&quot;&gt;mutate&lt;/code&gt;. Additionally, we need to mark &lt;code class=&quot;highlighter-rouge&quot;&gt;b,w,h&lt;/code&gt; arguments as static so that the compiler knows they’re constant throughout the execution.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def rmse_nj(original, canvas, b, w, h):
+  return N.sqrt(N.mean(L.reshape((original-canvas)**2,(b,w*h)) , axis=1))
+
+rmse = jax.jit(rmse_nj, static_argnums=(2,3,4))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;rmse&lt;/code&gt; is pretty self explanatory. The only major change from the CPU version is that we compute mean across 1st axis (loaf’s long axis).&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def hill_climb(original, canvas, prng_key, iterations):
+  with loops.Scope() as s:
+    s.best_score = N.inf
+    s.best_canvas = canvas
+    s.canvas = canvas
+    s.prng_key = prng_key
+    for run in s.range(iterations):
+      s.prng_key, subkey = jax.random.split(s.prng_key)
+      s.canvas+=modify(batch_size, width, height, subkey)
+      s.canvas%=2
+      rmse_vals = rmse(original, nv_rgen( s.canvas ), batch_size, width, height)
+      curr_min = N.min(rmse_vals)
+      for _ in s.cond_range(curr_min &amp;lt; s.best_score):
+        s.best_score = curr_min
+        s.best_canvas = N.repeat((s.canvas[N.argmin(rmse_vals)])[N.newaxis, :, :,], batch_size, axis = 0)
+      s.canvas = s.best_canvas
+    return s.canvas
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;hill_climb&lt;/code&gt; is the main function in the program. It is one big JAX loop construct. We could use standard python loops here, but we need to take full advantage of using JAX.&lt;/p&gt;
+
+&lt;p&gt;JAX loops (&lt;code class=&quot;highlighter-rouge&quot;&gt;jax.experimental.loops&lt;/code&gt; for now) is a syntactic sugar functions like &lt;code class=&quot;highlighter-rouge&quot;&gt;lax.fori_loop_&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;lax.cond&lt;/code&gt;. lax loops(actual XLA loops) that have more than a few statements and nesting gets very complicated. JAX (Experimental) loops however bring it somehwat close to standard python loops. The only caveat is that the loop state, ie. anything that mutates across interations have to be stored as a scope member. For us, this includes the &lt;code class=&quot;highlighter-rouge&quot;&gt;best_score&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;best_canvas&lt;/code&gt;, temporary canvas where we run life and the PRNG &lt;code class=&quot;highlighter-rouge&quot;&gt;key&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;jax-prngs&quot;&gt;JAX PRNGS&lt;/h3&gt;
+
+&lt;p&gt;Numpy uses a managed PRNG for all of it’s functions having random. ie, seeding it and managing it’s state are entirely managed by numpy.  As I understand, in parallel executions(like in a GPU) and in situation that need a large number of randoms, this method has flaws. It is difficult to ensure that we have enough entropy for producing large enough quantity randoms.&lt;/p&gt;
+
+&lt;p&gt;Unlike numpy, JAX random generation is “unmanaged”. Every &lt;code class=&quot;highlighter-rouge&quot;&gt;jax.random&lt;/code&gt; function needs the current state of the PRNG as it’s first argument, and every time we execute one of these functions, the PRNG state has to be updated using &lt;code class=&quot;highlighter-rouge&quot;&gt;jax.random.split&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Not updating the PRNG state will quickly result in the same set of randoms over and over again. I did’nt  quite understand this part the first time I wrote the loop, and it resulted in the algorithm ceasing to find new variations of canvas states. This happened becasue we’re generating the same mutator tensor over and over again.&lt;/p&gt;
+
+&lt;p&gt;Splitting PRNG state is also the way to ensure that every parallel component of the algorithm generate distinct randoms. Find more details of JAX PRNG Design &lt;a href=&quot;https://github.com/google/jax/blob/master/design_notes/prng.md&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;cond_range&quot;&gt;cond_range&lt;/h3&gt;
+
+&lt;p&gt;Why are conditionals also loops in JAX? er.. I’m not quite sure about this. It should be possible for cond_range to output a regular boolean instead of a 0/1-long iterator. But for some reason, it’s build like that.&lt;/p&gt;
+
+&lt;p&gt;If we found a better canvas slice, we extrude that and set it as our &lt;code class=&quot;highlighter-rouge&quot;&gt;best_canvas&lt;/code&gt; and it’s score as the &lt;code class=&quot;highlighter-rouge&quot;&gt;best_score&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After a finite number of iterations, we’d obtain a Game of Life state that reveals a Mona Lisa after N generations.&lt;/p&gt;
+
+&lt;h1 id=&quot;results&quot;&gt;Results&lt;/h1&gt;
+
+&lt;p&gt;Running ~1000 iterations for a 483px wide Mona Lisa on the google colab GPU runtime only takes around 40 seconds!. Compared to the CPU version which takes several hours to do the same for a smaller image, I think we’ve achieved our goals.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/lisa_still.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A life state with the highest similarity to the target is achieved after running for ~23000 iterations (10 minutes). After 23K, the gains start to diminish greatly and doesn’t seem to   improve much, even if you run for 100K iterations.&lt;/p&gt;
+
+&lt;p&gt;Also, Images targetted at lower generations tend to have better fit as expected.&lt;/p&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/lisa.webm&quot; type=&quot;video/webm&quot; /&gt; &lt;/video&gt;
+
+&lt;cap&gt;Mona Lisa, 10 generations&lt;/cap&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/check.webm&quot; type=&quot;video/webm&quot; /&gt; &lt;/video&gt;
+
+&lt;cap&gt;Checkerboard Test Pattern, 7 generations&lt;/cap&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/test2.webm&quot; type=&quot;video/webm&quot; /&gt; &lt;/video&gt;
+
+&lt;cap&gt;Text Test Pattern, 5 generations&lt;/cap&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/david.webm&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;cap&gt;David by Michelangelo, 3 generations&lt;/cap&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/moon.webm&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;cap&gt;Moon, 7 generations (https://unsplash.com/photos/pd4lo70LdbI)&lt;/cap&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/neil.webm&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;cap&gt;Neil Armstrong, 7 generations&lt;/cap&gt;
+
+&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+
+&lt;p&gt;I was really looking for an excuse to dive into JAX that doesn’t necessarily involve it’s automatic differentiation capabilities. JAX can be used to any general computing problem that works on tensors. I’m sure I made many mistakes here, but this was very much a learning experience for me.&lt;/p&gt;
+
+&lt;p&gt;Thank you Kevin Galligan for the original idea and Bojan Nikolic for the Game of Life snippet.&lt;/p&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/conway.webm&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;cap&gt;John Horton Conway FRS (26 December 1937 – 11 April 2020) RIP&lt;/cap&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://news.ycombinator.com/item?id=26384403&quot;&gt;HN Thread &lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Fri, 19 Feb 2021 15:00:00 +0000</pubDate>
+        <link>http://localhost:4000/algorithms/programming/2021/02/19/finding-mona-lisa-in-the-game-of-life.html</link>
+        <guid isPermaLink="true">http://localhost:4000/algorithms/programming/2021/02/19/finding-mona-lisa-in-the-game-of-life.html</guid>
+        
+        
+        <category>algorithms</category>
+        
+        <category>programming</category>
+        
+      </item>
+    
+      <item>
+        <title>Noise Planets</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/uploads/erporydxmaarwcd.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;cap&gt;Thank you Tyler Hobbs for the inspiration&lt;/cap&gt;
+
+&lt;p&gt;I recently found this piece of art (LINES 2A (2017)) created by &lt;a href=&quot;https://twitter.com/tylerxhobbs&quot;&gt;Tyler Hobbs&lt;/a&gt;. This picture kinda looked very hand drawn, but it’s completely generative. Something about this drawing and it’s texture kind of resonated with me, so I wanted to try to study and replicate (or make something inspired by this work) using p5js.&lt;/p&gt;
+
+&lt;p&gt;I started out by plotting a bunch of random points within a circle like so.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;w = 1000
+function setup() {
+  createCanvas(w, w);
+  background('#F9F8F4');
+}
+
+function draw() {
+  x = random(w)
+  y = random(w)
+  if (pow(w/2 - x, 2) + pow(w/2 - y, 2) &amp;lt; 7e4) {
+    point(x,y)
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/download-25.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This is a painfully slow process to generate random points in a circle. I found a better way to do this later. What I wanted to do next was to generate flow fields, but restricted to the circular region.&lt;/p&gt;
+
+&lt;p&gt;It’s super easy to generate flow field patterns using perlin noise.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Choose a random point &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;x,y&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Plot &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;x,y&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Calculate &lt;code class=&quot;highlighter-rouge&quot;&gt;n = noise(x,y)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Do &lt;code class=&quot;highlighter-rouge&quot;&gt;x+=cos(n * 2 * PI)&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;y+=sin(n * 2 * PI)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Repeat 2.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;We’re going to plot flow fields inside the circle. Let’s try this.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const is_in_circle = (x, y) =&amp;gt; 
+  (pow(w / 2 - x, 2) + pow(w / 2 - y, 2) &amp;lt; 7e4)
+
+function draw() {
+  if (is_in_circle(x = random(w), y = random(w)))
+    while (is_in_circle(x, y)) {
+      n = noise(x, y)
+      x += sin(n * TAU)
+      y += cos(n * TAU)
+      point(x, y)
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/download-28.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;OK, not very good. The noise at this level is pretty rough. we’re going to zoom in to the noise function (by dividing the &lt;code class=&quot;highlighter-rouge&quot;&gt;x,y&lt;/code&gt; inputs by some constant value) and probably use &lt;code class=&quot;highlighter-rouge&quot;&gt;circle(x ,y ,0.3)&lt;/code&gt; to plot points instead if point function, because I feel it looks way smoother. Also, I’m adding a &lt;code class=&quot;highlighter-rouge&quot;&gt;random() &amp;gt; 0.01&lt;/code&gt; condition in the loop so that we also get short lines that are not trimmed away by the edge of the circle.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;function draw() {
+  if (is_in_circle(x = random(w), y = random(w)))
+    while (is_in_circle(x, y) &amp;amp;&amp;amp; random() &amp;gt; 0.01) {
+      n = noise(x / 500, y / 500)
+      x += sin(n * TAU)
+      y += cos(n * TAU)
+      circle(x, y, .3)
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/download-27.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Actually.. not bad. I think we manage almost replicate the original texture. The inverted version also looks pretty good.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/download-19.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/ppanets.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I went ahead and made a つぶやきProcessing version of this.&lt;/p&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;function setup(){createCanvas(w=1e3,w),background(&quot;&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt;&quot;)}function draw(){if(g(x=random(w),y=random(w)))for(;g(x,y)&amp;amp;&amp;amp;random()&amp;gt;.01;)n=noise(x/500,y/500),x+=sin(n_TAU),y+=cos(n_TAU),circle(x,y,.3)}g=((n,o)=&amp;gt;pow(w/2-n,2)+pow(w/2-o,2)&amp;lt;w*w/16); &lt;a href=&quot;https://t.co/iVZTMtCn3i&quot;&gt;pic.twitter.com/iVZTMtCn3i&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1347903013042622467?ref_src=twsrc%5Etfw&quot;&gt;January 9, 2021&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;going-further-animations&quot;&gt;Going Further: Animations&lt;/h2&gt;
+
+&lt;p&gt;The code we wrote right now technically is animated. The animation however is not very smooth.&lt;/p&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/simplescreenrecorder-2021-01-10_03-52-31.mp4&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;p&gt;To make smooth animations, we need to generate new points in the circle, keep track of these points outside the &lt;code class=&quot;highlighter-rouge&quot;&gt;draw()&lt;/code&gt; function. I found this neat &lt;a href=&quot;https://stackoverflow.com/a/50746409&quot;&gt;technique&lt;/a&gt;, to find random points in a circle where a random radius &lt;code class=&quot;highlighter-rouge&quot;&gt;r&lt;/code&gt; and angle &lt;code class=&quot;highlighter-rouge&quot;&gt;theta&lt;/code&gt; are chosen and the &lt;code class=&quot;highlighter-rouge&quot;&gt;x,y&lt;/code&gt; points are obtained as &lt;code class=&quot;highlighter-rouge&quot;&gt;x = centerX + r * cos(theta)&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;y = centerY + r * sin(theta)&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Let’s try that first.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;function random_point() {
+  r = random(w / 4)
+  t = random(TAU)
+  return [
+    w/2 + cos(t) * r, 
+    w/2 + sin(t) * r
+  ]
+}
+
+function setup() {
+  createCanvas((w = 1e3), w);
+  background(255)
+  k = w / 2
+  m = (Array(w).fill(0)).map(random_point)
+}
+
+function draw() {
+  for (i = k; --i;) {
+    [x, y] = m[i]
+    circle(x, y, .3);
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/screenshot-from-2021-01-10-04-51-20.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;and now we apply flow fields and try to move these points.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;function random_point() {
+  r = random(w / 4)
+  t = random(TAU)
+  return [
+    w/2 + cos(t) * r, 
+    w/2 + sin(t) * r
+  ]
+}
+
+const w = 1000
+function setup() {
+  createCanvas(w, w);
+  background('#F9F8F4')
+  k = w / 2
+  points = (Array(k).fill(0)).map(random_point)
+}
+
+function draw() {
+  for (i = k; --i;) {
+    [x, y] = m[i]
+    x += sin(n = noise(x / 400, y / 400) * TAU) * h
+    y += cos(n) * h
+    stroke(i%255)
+    circle(x, y,.3)
+    if (pow(k - x, 2) + pow(k - y, 2) &amp;lt; 7e4)  // if point is in circle
+      points[i] = [x, y, t]
+    else points[i] = random_point() // replace with new point if not
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;/uploads/simplescreenrecorder-2021-01-10_04-56-11.mp4&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;p&gt;And a つぶやきProcessing version of course..&lt;/p&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;cy&quot; dir=&quot;ltr&quot;&gt;t=0,p=i=&amp;gt;\[k+(r=random(w/4))_cos(t+=.1),k+r_sin(t)\],setup=i=&amp;gt;{createCanvas(w=1e3,w),m=Array(k=w/2).fill(0).map(p)},draw=r=&amp;gt;{for(i=k;--i;)\[x,y\]=m\[i\],x+=sin(n=noise(x/k,y/k)_TAU),y+=cos(n),stroke(i%4_85),point(x,y),k_w+x_x+y_y-w_(x+y)&amp;lt;7e4?m\[i\]=\[x,y\]:m\[i\]=p()};//&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt; &lt;a href=&quot;https://t.co/xVhCBNUltL&quot;&gt;pic.twitter.com/xVhCBNUltL&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1347930637227855874?ref_src=twsrc%5Etfw&quot;&gt;January 9, 2021&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;adding-colors&quot;&gt;Adding Colors&lt;/h2&gt;
+
+&lt;p&gt;There are many strategies to colorizing this sketch. One is by just giving each particle a random initial color.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/download-21.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;However, I found that maintaining the initial x or y position in the particle array and using that to derive the hue information gives us some nice Jupiter/gaseous planet vibes.&lt;/p&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/simplescreenrecorder-2021-01-10_05-18-19.mp4&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;p&gt;The fringing at the sides can be avoided by moving 50% of the points in the reverse direction.&lt;/p&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/simplescreenrecorder-2021-01-10_05-28-03.mp4&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;video loop=&quot;&quot; autoplay=&quot;&quot; muted=&quot;&quot;&gt; &lt;source src=&quot;https://avinayak.github.io/uploads/simplescreenrecorder-2021-01-10_08-43-25.mp4&quot; type=&quot;video/mp4&quot; /&gt; &lt;/video&gt;
+
+&lt;p&gt;More color variations&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/untitled.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And that’s it. Hope this was educational!&lt;/p&gt;
+</description>
+        <pubDate>Sat, 09 Jan 2021 03:00:00 +0000</pubDate>
+        <link>http://localhost:4000/art/2021/01/09/noise-planets.html</link>
+        <guid isPermaLink="true">http://localhost:4000/art/2021/01/09/noise-planets.html</guid>
+        
+        
+        <category>art</category>
+        
+      </item>
+    
+      <item>
+        <title>Another Test</title>
+        <description>&lt;iframe width=&quot;100%&quot; height=&quot;500&quot; frameborder=&quot;0&quot; src=&quot;https://observablehq.com/embed/@rreusser/multiscale-turing-patterns-in-webgl?cell=*&quot;&gt;&lt;/iframe&gt;
+</description>
+        <pubDate>Wed, 23 Sep 2020 15:00:00 +0000</pubDate>
+        <link>http://localhost:4000/hardware/2020/09/23/another-test.html</link>
+        <guid isPermaLink="true">http://localhost:4000/hardware/2020/09/23/another-test.html</guid>
+        
+        
+        <category>hardware</category>
+        
+      </item>
+    
+      <item>
+        <title>Generative Bad Handwriting</title>
+        <description>&lt;p&gt;So.. I made a popular tweet last week in the &lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hashtag_click&quot;&gt;#つぶやきProcessing&lt;/a&gt; circles.&lt;/p&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;cy&quot; dir=&quot;ltr&quot;&gt;j=24,m=0,draw=(a=&amp;gt;{for(v=(i=&amp;gt;w/3*(n=noise)(i)-k),createCanvas(w=1e3,w),noFill(),background('&lt;a href=&quot;https://twitter.com/hashtag/fd7?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#fd7&lt;/a&gt;'),translate(0,m--),i=0,y=0;y&amp;lt;w-m;y+=j)for(x=k=90;x&amp;lt;w-k;x+=9)if(y+k&amp;gt;-m?curve(v(i++)+x,v(i++)+y,x,j+y,x+9,j+y,v(i++)+x,v(i++)+y):i+=4,x+=v(i++)%9,n(x*y)&amp;lt;.13)y+=j});//&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt; &lt;a href=&quot;https://t.co/WNIwAAAXjQ&quot;&gt;pic.twitter.com/WNIwAAAXjQ&lt;/a&gt;&lt;/p&gt;— atulvinayak (@atulvinayak) &lt;a href=&quot;https://twitter.com/atulvinayak/status/1305116417419653120?ref_src=twsrc%5Etfw&quot;&gt;September 13, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;I’ll try to explain how this script worked and how I was able to fit the whole thing into 280 characters. If you’re new to p5.js, just try pasting the tweet text to &lt;a href=&quot;https://editor.p5js.org/&quot; title=&quot;https://editor.p5js.org/&quot;&gt;https://editor.p5js.org/&lt;/a&gt; to get a similar output.&lt;/p&gt;
+
+&lt;h1 id=&quot;story-and-previous-works&quot;&gt;Story and Previous works&lt;/h1&gt;
+
+&lt;p&gt;All of this started when last week when I was experimenting with the p5js &lt;code class=&quot;highlighter-rouge&quot;&gt;curve()&lt;/code&gt; function. Internally this is an implementation of the &lt;a href=&quot;https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline&quot; title=&quot;Centripetal Catmull–Rom spline&quot;&gt;Centripetal Catmull–Rom spline&lt;/a&gt;. I tried generating a bunch of 8 legged water spiders for fun :)&lt;/p&gt;
+
+&lt;video controls=&quot;&quot; muted=&quot;&quot; src=&quot;https://video.twimg.com/ext_tw_video/1303620577589039104/pu/vid/720x720/8iYWjReFxe-9kWVl.mp4?tag=10&quot;&gt;
+&lt;/video&gt;
+
+&lt;p&gt;I admit this looks pretty stupid. The aim was to generate an animation a whole bunch of water spiders with the camera panning around. But then, for me to understand how exactly the Catmull-Rom spline worked, I decided to randomly plot a bunch of curves on a 2D canvas and it somehow resembled handwriting from my native language (&lt;a href=&quot;https://en.wikipedia.org/wiki/Malayalam&quot;&gt;Malayalam&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/download-12.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Actual Malayalam handwriting sample.&lt;br /&gt;
+&lt;img src=&quot;/uploads/4f31bc2ce9a02537444fc6eeea276dc5.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Reducing character spacing.. Do you see the similarity now?&lt;br /&gt;
+&lt;img src=&quot;/uploads/download-10.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Also, at this time I was playing the PC remaster of &lt;a href=&quot;https://en.wikipedia.org/wiki/Journey_(2012_video_game)&quot;&gt;Journey (2012)&lt;/a&gt;. Journey has a very beautiful blocky scriptures all over the temples in the game.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/eayhyxhueaagmqu.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I guessed this is pretty easy generate. I made a few attempts to reproduce the approximate style using p5.js&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/download-8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;and even an infinite scrolling version&lt;/p&gt;
+
+&lt;video controls=&quot;&quot; muted=&quot;&quot; src=&quot;https://video.twimg.com/ext_tw_video/1304311867284664323/pu/vid/720x720/zNWZ-LQrIl0KrnCU.mp4?tag=10&quot;&gt;
+&lt;/video&gt;
+
+&lt;p&gt;This script had some serious performance issues(you can see it slowing down towards the end). Later I learned that this style of meaningless writing is a thing in the art community known as Generative &lt;a href=&quot;https://en.wikipedia.org/wiki/Asemic_writing&quot;&gt;Asemic Writing&lt;/a&gt;. According to Wikipedia:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Asemic writing&lt;/strong&gt; is a wordless open semantic form of writing. The word asemic means “having no specific semantic content”. With the nonspecificity of asemic writing there comes a vacuum of meaning which is left for the reader to fill in and interpret.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I decided to combine the two and make an infinite generator of malayalam-esque asemic writing. I’ve seen curve generated asemic &lt;a href=&quot;https://www.reddit.com/r/asemic/comments/dw5ze3/generative_script/?ref=share&amp;amp;ref_source=link&quot;&gt;before&lt;/a&gt;. So, What I did is not something new.. however, maybe the way I made it infinite scrolling was something new(?). I’ll try to explain how the code works.&lt;/p&gt;
+
+&lt;h1 id=&quot;code&quot;&gt;Code&lt;/h1&gt;
+
+&lt;p&gt;I lost the original script in the minifying process, but I managed to unminify the tweet somehow.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var yOffset = 24;
+var scrollPosition = 0;
+var canvasWidth = 800;
+var margin = 90
+
+function setup() {
+    createCanvas(canvasWidth, canvasWidth)
+    noFill();
+}
+
+function deterministicRandom(index) {
+  return 1000 / 3 * noise(index) - 90
+}
+
+function draw() {
+    background('#fd7');
+    translate(0, scrollPosition--);
+
+    for (i = 0, y = 0; y &amp;lt; canvasWidth - scrollPosition; y += yOffset)
+        for (x = 90; x &amp;lt; canvasWidth - margin;) {
+            if (y + margin &amp;gt; -scrollPosition) {
+                curve(
+                  deterministicRandom(i++) + x, 
+                  deterministicRandom(i++) + y, 
+                  x, 
+                  y + yOffset, 
+                  x + 9, 
+                  y + yOffset, 
+                  deterministicRandom(i++) + x, 
+                  deterministicRandom(i++) + y
+                )
+            } else {
+                i += 4
+            }
+            x += (9 + deterministicRandom(i++) % 9)
+            if (noise(x * y) &amp;lt; .13)
+            {
+              y += 2*yOffset
+              x = margin
+            }
+        }
+
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The most important part of the code is the function &lt;code class=&quot;highlighter-rouge&quot;&gt;deterministicRandom()&lt;/code&gt; which is used a lot of times in the sketch. It’s basically &lt;code class=&quot;highlighter-rouge&quot;&gt;noise()&lt;/code&gt; but mapped to range &lt;code class=&quot;highlighter-rouge&quot;&gt;[243, -90]&lt;/code&gt;. p5 js &lt;code class=&quot;highlighter-rouge&quot;&gt;curve()&lt;/code&gt; takes in 2 control point and 2 physical point coordinate to determine the location and shape of the curve. Each character is is thus a set of 4 deterministically random numbers for control points + 4 constants for physical points. All of these points are offset by a base &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;x,y&amp;gt;&lt;/code&gt; coordinate to place the curve in a line. &lt;em&gt;Because it’s deterministically random, the shapes and location of the curves are preserved in every frame&lt;/em&gt;.. making the infinite scroll effect work.&lt;/p&gt;
+
+&lt;p&gt;The 2 loops iterate over x and y, at a constant rate. x by 9 pixels and y by 24 pixels. But, inside the loop, based on deterministic random, x is randomly incremented by up to 9 pixels to simulate the randomness in spaces between characters. Also, if for a random condition with somewhat low probability (&lt;code class=&quot;highlighter-rouge&quot;&gt;noise(x * y) &amp;lt; .13&lt;/code&gt;), a line-break is added. Which means, y is incremented thrice in that loop and x is reset to a margin value (90).&lt;/p&gt;
+
+&lt;iframe style=&quot;height: 800px;width: 100%;&quot; frameborder=&quot;0&quot; src=&quot;https://editor.p5js.org/solarsailer_/embed/mIVv0GCYu&quot;&gt;&lt;/iframe&gt;
+
+&lt;h1 id=&quot;camera-motion-and-line-by-line-rendering&quot;&gt;Camera motion and line by line rendering&lt;/h1&gt;
+
+&lt;p&gt;The infinite scroll effect is basically done using &lt;code class=&quot;highlighter-rouge&quot;&gt;translate(0, scrollPosition--)&lt;/code&gt;. The loop termination clause is adjusted such that only lines within the frame are rendered (between &lt;code class=&quot;highlighter-rouge&quot;&gt;y = scrollPosition to scrollPosition+canvasHeight&lt;/code&gt;). The condition &lt;code class=&quot;highlighter-rouge&quot;&gt;y + margin &amp;gt; -scrollPosition&lt;/code&gt; directly inside the loop checks for this. This also offsets the random number index to the one needed by the lines being rendered in the else case. Here’s a version of the script that shows lines being rendered as the script runs:&lt;/p&gt;
+
+&lt;iframe style=&quot;height: 800px;width: 100%;&quot; frameborder=&quot;0&quot; src=&quot;https://editor.p5js.org/solarsailer_/embed/Krn5nJ1hY&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;And that’s basically it. The initial version I designed rendered every line from the first scroll position to the last in every frame, even if those lines were not visible. This is terrible for performance and the if condition inside the loop fixed this.&lt;/p&gt;
+
+&lt;h1 id=&quot;minifying&quot;&gt;Minifying&lt;/h1&gt;
+
+&lt;p&gt;Step one of minifying was converting all the functions to &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions&quot;&gt;arrow functions&lt;/a&gt;. This took up way less space. Then I moved all the &lt;code class=&quot;highlighter-rouge&quot;&gt;setup()&lt;/code&gt; stuff to &lt;code class=&quot;highlighter-rouge&quot;&gt;draw()&lt;/code&gt;. p5 does not re-execute &lt;code class=&quot;highlighter-rouge&quot;&gt;createCanvas&lt;/code&gt; even if you place it in &lt;code class=&quot;highlighter-rouge&quot;&gt;draw()&lt;/code&gt;. Then I had to cut down number of variables as much as I can. 2 of them were reused: &lt;code class=&quot;highlighter-rouge&quot;&gt;canvasWidth(w)&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;margin(k)&lt;/code&gt; were also used as a coefficient in &lt;code class=&quot;highlighter-rouge&quot;&gt;deterministicRandom()&lt;/code&gt;. Finally spaces were removed and long names were truncated to single characters.&lt;/p&gt;
+
+&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+
+&lt;p&gt;This script was written in about 2-3 hours. Looking back, I can see a lot of places where I’d try to reduce repeated code and make it smoother. I never thought this would go so popular, so I never really cared to optimize so much. But there you go.. a simple way to generate bad handwriting :)&lt;/p&gt;
+</description>
+        <pubDate>Fri, 18 Sep 2020 15:00:00 +0000</pubDate>
+        <link>http://localhost:4000/programming/art/2020/09/18/p5-strokes.html</link>
+        <guid isPermaLink="true">http://localhost:4000/programming/art/2020/09/18/p5-strokes.html</guid>
+        
+        
+        <category>programming</category>
+        
+        <category>art</category>
+        
+      </item>
+    
+      <item>
+        <title>Tweet p5.js (#つぶやきProcessing) Showcase</title>
+        <description>&lt;p&gt;This page might take a few seconds to fully load..&lt;/p&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;m=0,h=13,draw=_=&amp;gt;{for(createCanvas(w=1e3,w),background(i=k=n=0),t=t=&amp;gt;text(Array(\~\~R(5)).fill(R(w).toString(36)),w_t,i_h+m),a=textAlign,R=t=&amp;gt;noise(n++)_t,fill(&quot;&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt;&quot;),m--;h_i++&amp;lt;w-m;a(CENTER))R(1)&amp;lt;.2?(k=\~k,i+=2):k?(t(.75),t(.25)):(a(LEFT),t(.51),a(RIGHT)),t(.5)}; &lt;a href=&quot;https://t.co/h7DAnbwoUo&quot;&gt;pic.twitter.com/h7DAnbwoUo&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1318168671672365057?ref_src=twsrc%5Etfw&quot;&gt;October 19, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;t=0,draw=(e=&amp;gt;{for(n=noise,createCanvas(w=1e3,w),t+=.01,noFill(),background(0),i=30;--i;){for(strokeWeight(3_n(i+10)),beginShape(),y=w;y-=4;)stroke(n(3_i)_w/3),vertex(w/2+n(9_i)_w/3_cos(y/(9+10*n(i+10))/30+t+n(i+t/w)),y);endShape()}});//&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt; &lt;a href=&quot;https://t.co/UJV69rpzyE&quot;&gt;pic.twitter.com/UJV69rpzyE&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1364546514257924103?ref_src=twsrc%5Etfw&quot;&gt;February 24, 2021&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;z=0,draw=(r=&amp;gt;{for(createCanvas(w=1e3,w),background(0),translate(0,z--),stroke(&quot;&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt;&quot;),R=rect,i=0,l=99,u=0;u++&amp;lt;9-z/80;)for(b=0;b++&amp;lt;9;)for(a=b_l,m=9;m--;)for(x=4;x--;)u&amp;lt;-z/l?i++:noise(i++)w%3&amp;amp;2&amp;amp;&amp;amp;R(a-4_x,ul-4_m,4)&amp;amp;&amp;amp;R(a+4_x,u_l-4_m,4)}); &lt;a href=&quot;https://t.co/zTUBpVBacT&quot;&gt;pic.twitter.com/zTUBpVBacT&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1314055154853842945?ref_src=twsrc%5Etfw&quot;&gt;October 8, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;draw=_=&amp;gt;{for(createCanvas(w=1e3,w),stroke(&quot;&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt;&quot;),background(0),strokeWeight(2),blendMode(EXCLUSION),z=w,j=t=31;z--;j=random(\[57,72,62,48,-47,45,61,8,65,49\]))\[1,86,69,21,18,38,4\].map((e,a)=&amp;gt;2_t+j&amp;gt;&amp;gt;a&amp;amp;1&amp;amp;&amp;amp;line(...\[3,2,1,0\].map(a=&amp;gt;9+11_(e&amp;gt;&amp;gt;2*a&amp;amp;3)+(1&amp;amp;a?z/t|0:z%t)*t)))}; &lt;a href=&quot;https://t.co/XRaE58Ujr0&quot;&gt;pic.twitter.com/XRaE58Ujr0&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1314757749897478145?ref_src=twsrc%5Etfw&quot;&gt;October 10, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;und&quot; dir=&quot;ltr&quot;&gt;&lt;a href=&quot;https://t.co/nKdNwYObhv&quot;&gt;pic.twitter.com/nKdNwYObhv&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1347930920251101186?ref_src=twsrc%5Etfw&quot;&gt;January 9, 2021&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;function setup(){createCanvas(w=1e3,w),background(&quot;&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt;&quot;)}function draw(){if(g(x=random(w),y=random(w)))for(;g(x,y)&amp;amp;&amp;amp;random()&amp;gt;.01;)n=noise(x/500,y/500),x+=sin(n_TAU),y+=cos(n_TAU),circle(x,y,.3)}g=((n,o)=&amp;gt;pow(w/2-n,2)+pow(w/2-o,2)&amp;lt;w*w/16); &lt;a href=&quot;https://t.co/iVZTMtCn3i&quot;&gt;pic.twitter.com/iVZTMtCn3i&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1347903013042622467?ref_src=twsrc%5Etfw&quot;&gt;January 9, 2021&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;function draw(){for(createCanvas(w=1e3,w),noStroke(),r=w/s,background(0),i+=.1,y=s;y--;)for(x=1;x&amp;lt;s-2;x++)y&amp;lt;s-1?m\[x-random(\[-1,1\])\]\[y\]=max(m\[x\]\[y+1\]-.2,0):m\[x\]\[s-1\]=25_noise(x/10,i),circle(x_r+15,y*r,m\[x\]\[y\])}m=Array(s=70).fill().map(()=&amp;gt;Array(s).fill()),i=0;//&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt; &lt;a href=&quot;https://t.co/i1Pc39NGqv&quot;&gt;pic.twitter.com/i1Pc39NGqv&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1347551617181093891?ref_src=twsrc%5Etfw&quot;&gt;January 8, 2021&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;function setup(){for(createCanvas(w=1e3,w-60),background(0),fill(f=p=&quot;&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt;&quot;),textFont(&quot;mono&quot;),textStyle(BOLD),x=1.01,r=67,s=95,y=80,y=77;y&amp;lt;w;y+=r)textSize(s),text(f+=p,x,y),s/=1.1082,r/=1.07} &lt;a href=&quot;https://t.co/ZuDnRAKASM&quot;&gt;pic.twitter.com/ZuDnRAKASM&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1347199154594799618?ref_src=twsrc%5Etfw&quot;&gt;January 7, 2021&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;und&quot; dir=&quot;ltr&quot;&gt;&lt;a href=&quot;https://t.co/DJ6fqZYrki&quot;&gt;pic.twitter.com/DJ6fqZYrki&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1344667716238639114?ref_src=twsrc%5Etfw&quot;&gt;December 31, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;cy&quot; dir=&quot;ltr&quot;&gt;j=24,m=0,draw=(a=&amp;gt;{for(v=(i=&amp;gt;w/3*(n=noise)(i)-k),createCanvas(w=1e3,w),noFill(),background('&lt;a href=&quot;https://twitter.com/hashtag/fd7?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#fd7&lt;/a&gt;'),translate(0,m--),i=0,y=0;y&amp;lt;w-m;y+=j)for(x=k=90;x&amp;lt;w-k;x+=9)if(y+k&amp;gt;-m?curve(v(i++)+x,v(i++)+y,x,j+y,x+9,j+y,v(i++)+x,v(i++)+y):i+=4,x+=v(i++)%9,n(x*y)&amp;lt;.13)y+=j});//&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt; &lt;a href=&quot;https://t.co/WNIwAAAXjQ&quot;&gt;pic.twitter.com/WNIwAAAXjQ&lt;/a&gt;&lt;/p&gt;— Atul Vinayak (@atulvinayak) &lt;a href=&quot;https://twitter.com/atulvinayak/status/1305116417419653120?ref_src=twsrc%5Etfw&quot;&gt;September 13, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;function setup(){createCanvas(w,w)}function draw(){for(background(0),fill(255),textSize(25),x=0;x&amp;lt;w;x+=a)for(y=0;y&amp;lt;w;y+=a)text(String.fromCharCode(int(noise(x/n+i,y/n)*s)+9600),x,y);i+=.01}s=60,w=n=1e3,a=w/s,i=0;//&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt; &lt;a href=&quot;https://t.co/yXIbj6NONb&quot;&gt;pic.twitter.com/yXIbj6NONb&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1344572855007154177?ref_src=twsrc%5Etfw&quot;&gt;December 31, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;Inspired by Bubble chamber images from &lt;a href=&quot;https://twitter.com/CERN?ref_src=twsrc%5Etfw&quot;&gt;@CERN&lt;/a&gt; and others&lt;a href=&quot;https://t.co/tZqUlSlVQD&quot;&gt;https://t.co/tZqUlSlVQD&lt;/a&gt; &lt;a href=&quot;https://t.co/0a4BLJN14c&quot;&gt;pic.twitter.com/0a4BLJN14c&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1313448660475109376?ref_src=twsrc%5Etfw&quot;&gt;October 6, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;I realized that increasing lightness value can give much realistic discs like so. &lt;a href=&quot;https://t.co/M7hedi5IJ6&quot;&gt;pic.twitter.com/M7hedi5IJ6&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1313353818910810112?ref_src=twsrc%5Etfw&quot;&gt;October 6, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;w=1e3;s=20;setup=_=&amp;gt;createCanvas(w,w);t=0;draw=_=&amp;gt;{noStroke();translate(-10,t-=1);for(v=x=0;x&amp;lt;w;x+=s,v=x/s)for(z=y=0;y&amp;lt;w-t;y+=s,z=y/s){fill(p=z%5&amp;lt;2||v%6&amp;lt;3?0:\~\~(noise(v,z)*2.2)*255,p-70,0);rect(x,y,s,s)}}&lt;br /&gt;//&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt; &lt;a href=&quot;https://t.co/yEdjdZeKfu&quot;&gt;pic.twitter.com/yEdjdZeKfu&lt;/a&gt;&lt;/p&gt;— yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1304311898880405505?ref_src=twsrc%5Etfw&quot;&gt;September 11, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;w=1e3;setup=_=&amp;gt;{createCanvas(w, w);noFill();v=Array(1e4).fill(0).map(_=&amp;gt;w/4+random(w/2))};t=0;draw=_=&amp;gt;{t+=0.1;i=0;m=7;background(&amp;#39;&lt;a href=&quot;https://twitter.com/hashtag/%E3%81%A4%E3%81%B6%E3%82%84%E3%81%8DProcessing?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#つぶやきProcessing&lt;/a&gt;&amp;#39;);while(m--&amp;gt;0)curve(v[i++]*cos(t+v[i++]),v[i++]*sin(t+v[i++]),w/2,w/2,v[i++],v[i++],v[i++]*cos(t+v[i++]),v[i++]*sin(t+v[i++]));} &lt;a href=&quot;https://t.co/rT0GsBQHVH&quot;&gt;pic.twitter.com/rT0GsBQHVH&lt;/a&gt;&lt;/p&gt;&amp;mdash; yakinavault (@yakinavault) &lt;a href=&quot;https://twitter.com/yakinavault/status/1303620597839097858?ref_src=twsrc%5Etfw&quot;&gt;September 9, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+
+</description>
+        <pubDate>Fri, 31 Jul 2020 15:00:00 +0000</pubDate>
+        <link>http://localhost:4000/design/algorithm/art/2020/07/31/processing-showcase.html</link>
+        <guid isPermaLink="true">http://localhost:4000/design/algorithm/art/2020/07/31/processing-showcase.html</guid>
+        
+        
+        <category>design</category>
+        
+        <category>algorithm</category>
+        
+        <category>art</category>
+        
+      </item>
+    
+      <item>
+        <title>Project Kasparov Part 2 - react-chess</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/assets/images/chessreact.png&quot; alt=&quot;-&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If you haven’t read Project Kasparov Part 1, I suggest you follow this &lt;a href=&quot;https://avinayak.github.io/Project-Kasparov-chess.html&quot;&gt;link&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;All my web projects were written in jQuery till now (except the timer, which was Angular 1.0). I was hearing a lot of praise for react in Hacker News and Reddit. I wanted to learn react so badly, but I couldn’t think of any fun project that needed it. I could upgrade some of the older ones, but I wanted to try something new.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://reactjs.org/tutorial/tutorial.html&quot;&gt;Facebook’s React tutorial&lt;/a&gt; is a basic Tic-Tac-Toe game with some over the top features like time-travel, mainly intended to teach best practices for state management. I did the tutorial, but couldn’t get the hang of it.&lt;/p&gt;
+
+&lt;p&gt;So it decided to make a chess web app in React. I thought it’d be easier because I just did an App with a Game Pattern.&lt;/p&gt;
+
+&lt;p&gt;I have to thank &lt;a href=&quot;https://github.com/jhlywa&quot;&gt;jhlywa&lt;/a&gt; for the Amazing &lt;a href=&quot;https://github.com/jhlywa/chess.js/&quot;&gt;chess.js&lt;/a&gt; without which this app wouldn’t exist. Chess.js cover everything from move generation/validation, piece placement/movement, and check/checkmate/draw detection.&lt;/p&gt;
+
+&lt;p&gt;The AI at this point was just A random move generator, which selects a move at random from Chess.js’s list of valid next moves.&lt;/p&gt;
+
+&lt;p&gt;I followed a similar design pattern to the Tic-Tac-Toe app. Everything, including the ability to time-travel to an older move, was implemented. I reused some of chssbot’s code: the rendering and FEN to CHEQ_TT.TTF mapping.&lt;/p&gt;
+
+&lt;dl&gt;
+  &lt;dt&gt;Finally, I wanted to do AI. The best Chess AI in javascript was &lt;a href=&quot;https://github.com/exoticorn/stockfish-js&quot;&gt;stockfish&lt;/a&gt;.&lt;/dt&gt;
+  &lt;dd&gt;
+    &lt;p&gt;Stockfish-js is an emscripten port of the stockfish chess engine. (Emscripten being a c[++] to javascript compiler.) This enables one to run one of the strongest chess engines available without downloads or plugins in a web browser&lt;/p&gt;
+  &lt;/dd&gt;
+&lt;/dl&gt;
+
+&lt;p&gt;Unfortunately, Stockfish.js caused my NPM dev setup to crash every time I imported it, or &amp;lt;script&amp;gt; tagged it. The file was 1.12 MB in size due to the rulebook which came embedded in the JS file.&lt;/p&gt;
+
+&lt;p&gt;Stockfish-js is designed to run in a web-worker, which can be created like this:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;stockfish&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Worker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;stockfish.js&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Input the current Board state (FEN):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;sf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;postMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;`position fen &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;historicalStates&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;boardIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Input (standard UCI commands) to the engine is posted as a message to the worker:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;engine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;postMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;go depth 15&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// 15 is from 0-20 difficuilty levels? &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The output of the engine is again posted as a message, to receive it you need to install an event handler:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;engine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onmessage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;//display the move from event.data&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The UI was done with the help of React &lt;a href=&quot;https://material-ui.com/&quot;&gt;Material-UI&lt;/a&gt;, which I used in many of my projects from then.&lt;/p&gt;
+
+&lt;p&gt;Try &lt;a href=&quot;https://avinayak.github.io/chess/&quot;&gt;React-Chess&lt;/a&gt; now&lt;/p&gt;
+</description>
+        <pubDate>Fri, 28 Jul 2017 00:00:00 +0000</pubDate>
+        <link>http://localhost:4000/web/2017/07/28/chess2.html</link>
+        <guid isPermaLink="true">http://localhost:4000/web/2017/07/28/chess2.html</guid>
+        
+        
+        <category>web</category>
+        
+      </item>
+    
+      <item>
+        <title>Project Kasparov Part 1 - chssbot</title>
+        <description>&lt;p&gt;&lt;a class=&quot;twitter-timeline&quot; data-tweet-limit=&quot;1&quot; data-width=&quot;500&quot; href=&quot;https://twitter.com/chssbot?ref_src=twsrc%5Etfw&quot;&gt;&lt;/a&gt; &lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;Project Kasparov started out as a long-running desire to work on a chess related application.&lt;/p&gt;
+
+&lt;p&gt;I found the Algorithms, Typography and Literature surrounding Chess fascinating. I am not very good at playing chess though. I was stuck with the failure of deploying canvasbot, My Genetic Algorithm Art bot at this time.&lt;/p&gt;
+
+&lt;p&gt;I decided to create a PGN to MP4 converter. PGN or &lt;a href=&quot;https://en.wikipedia.org/wiki/Portable_Game_Notation&quot;&gt;Portable Game Notation&lt;/a&gt; is the standard file format for recording chess matches/games. A sample looks like so:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Event&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;F/S Return Match&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Site&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Belgrade, Serbia JUG&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Date&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;1992.11.04&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Round&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;29&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;White&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Fischer, Robert J.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Black&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Spassky, Boris V.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Result&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;1/2-1/2&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nf3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nc6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bb5&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a6&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;This&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;opening&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;called&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ruy&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Lopez&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.}&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ba4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nf6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;O&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;O&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Be7&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Re1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bb3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;O&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;O&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;h3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nb8&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nbd7&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cxb5&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;axb5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;13&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nc3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bb7&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bg5&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b4&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;15&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nb1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;h6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bh4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;17&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dxe5&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Nxe4&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bxe7&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Qxe7&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;19&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exd6&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Qf6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nbd2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nxd6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;21&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nc4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nxc4&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;22&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bxc4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nb6&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;23&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ne5&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rae8&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;24&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bxf7&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rxf7&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;25&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nxf7&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rxe1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;26&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Qxe1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kxf7&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;27&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Qe3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Qg5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Qxg5&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;hxg5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;29&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ke6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kd6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;31&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;axb4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cxb4&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ra5&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nd5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;33&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bc8&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;34&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kf2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bf5&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;35&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ra7&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;36&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ra6&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kc5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;37&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ke1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nf4&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nxh3&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;39&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kd2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kb5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rd6&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kc5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;41&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ra6&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Nf2&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bd3&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;43&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Re6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;I needed a way to parse these PGN files to something I can work with. Fortunately, I found &lt;a href=&quot;https://github.com/renatopp/pgnparser&quot;&gt;this&lt;/a&gt; excellent PGN parser by &lt;a href=&quot;https://github.com/renatopp&quot;&gt;Renato de Pontes Pereira&lt;/a&gt;. Also, I didn’t need to use Images/Vectors for rendering Chess board and pieces. Instead, I used &lt;a href=&quot;https://fonts2u.com/cheq.font&quot;&gt;CHEQ_TT.TTF&lt;/a&gt;, the Awesome Chess font. I could create cool Images like this!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/chess.jpg&quot; alt=&quot;-&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The PGN Parser output a series of roughly something like this&lt;/p&gt;
+
+&lt;p&gt;&lt;tt&gt;rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/R1BQKBNR&lt;/tt&gt;&lt;/p&gt;
+
+&lt;p&gt;This is called a FEN or &lt;a href=&quot;https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation&quot;&gt;Forsyth–Edwards Notation&lt;/a&gt;. The purpose of FEN is to provide all the necessary information to restart a game from a particular position.&lt;/p&gt;
+
+&lt;p&gt;A FEN is easily parsable. I Just needed to convert FEN to whatever glyph CHEQ_TT.TTF used. By trial and error, I created a mapping. An image of the current board position was rendered using &lt;a href=&quot;https://pillow.readthedocs.io/en/5.1.x/&quot;&gt;PIL&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Using some &lt;a href=&quot;https://en.wikipedia.org/wiki/FFmpeg&quot;&gt;FFMPEG&lt;/a&gt; magic, I was able to create an MP4 file.&lt;/p&gt;
+
+&lt;video controls=&quot;&quot; muted=&quot;&quot; width=&quot;500&quot; src=&quot;https://video.twimg.com/ext_tw_video/801408417852067840/pu/vid/364x360/-6qnZvik3BBaP49v.mp4&quot;&gt;
+&lt;/video&gt;
+
+&lt;p&gt;I still found these videos illegible, as it’s hard to keep track of the last move. So, As seen in the final version of &lt;a href=&quot;https://twitter.com/chssbot&quot;&gt;@chssbot&lt;/a&gt; each move is actually 3 frames (look carefully).&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Highlight the “from” cell and “to” cell of the next move in color.&lt;/li&gt;
+  &lt;li&gt;The actual move + Highlights.&lt;/li&gt;
+  &lt;li&gt;No Highlights.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;these three frames were played back at 3 X framerate. I found that the legibility of moves increased so much.&lt;/p&gt;
+
+&lt;p&gt;The highlighted color is randomly generated to avoid boredom 😊&lt;a href=&quot;https://twitter.com/chssbot&quot;&gt;@chssbot&lt;/a&gt; has been publishing a new game every 4h from Nov 2016.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;EDIT:&lt;/strong&gt; As of 2018 June 27, &lt;a href=&quot;https://twitter.com/chssbot&quot;&gt;@chssbot&lt;/a&gt; has 76 followers, and enjoys regular retweets and discussions :)&lt;/p&gt;
+
+&lt;blockquote class=&quot;twitter-tweet&quot; data-lang=&quot;en&quot;&gt;
+  &lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;Kasparov◻ vs Gueye◼&lt;br /&gt;Cannes Simultaneous Exhibition(1988)&lt;br /&gt;1-0 &lt;a href=&quot;https://t.co/D3a2aPrJum&quot;&gt;pic.twitter.com/D3a2aPrJum&lt;/a&gt;&lt;/p&gt;
+  &lt;p&gt;— Chess Bot (@chssbot) &lt;a href=&quot;https://twitter.com/chssbot/status/1011909791843840011?ref_src=twsrc%5Etfw&quot;&gt;June 27, 2018&lt;/a&gt;&amp;lt;/blockquote&amp;gt;
+&lt;script async=&quot;&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
+        <link>http://localhost:4000/programming/2016/11/28/chess.html</link>
+        <guid isPermaLink="true">http://localhost:4000/programming/2016/11/28/chess.html</guid>
+        
+        
+        <category>programming</category>
+        
+      </item>
+    
+      <item>
+        <title>Genetic Art</title>
+        <description>&lt;p&gt;I was experimenting with a lot of Genetic/Hill Climbing algorithms to generate Art. I started out by trying to approximate a Grayscale image with just lines of varying width and color intensity.&lt;/p&gt;
+
+&lt;p&gt;The genetic algorithm is roughly like this:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;nl&quot;&gt;Algorithm:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;χ&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;µ&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Initialise generation 0:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;population&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;randomly&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;generated&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;individuals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Evaluate Pk:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Compute&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fitness&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;∈&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
+        &lt;span class=&quot;c1&quot;&gt;// Create generation k + 1:&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// 1. Copy:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;Select&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;−&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;χ&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;×&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;members&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;insert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;into&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// 2. Crossover:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;Select&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;χ&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;×&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;members&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pair&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;them&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;up&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;produce&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;offspring&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
+        &lt;span class=&quot;n&quot;&gt;insert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;offspring&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;into&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// 3. Mutate:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;Select&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;µ&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;×&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;members&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;invert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;randomly&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;selected&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bit&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// Evaluate Pk+1:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;Compute&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fitness&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;∈&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// Increment:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fitness&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fittest&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;individual&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;high&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;enough&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fittest&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;individual&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The first image after several geneartions..&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/GA1.png&quot; alt=&quot;ga&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I lost the original image I was trying to approximate.. but doesn’t that look like a deer? 🙄 I modified the algorithm several times to approximate my face. This is the original image..&lt;/p&gt;
+
+&lt;p&gt;FYI this is what I look like&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/face.jpg&quot; alt=&quot;ga&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;First Attempt&lt;/strong&gt;: Program too slow. Had to stop after 10 Hours.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/GA.png&quot; alt=&quot;ga&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Second Attempt&lt;/strong&gt;: Rewrote the program to use Numpy arrays and Bezier Curves instead on just Lines. Also now in Technicolor!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/error1.png&quot; alt=&quot;ga&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Bugfixes &amp;amp; Third Attempt&lt;/strong&gt;: Atleast it’s converging to something&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/out.png&quot; alt=&quot;ga&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;But I didn’t look like this at all :/ . The problem here was that the fitness function was&lt;/p&gt;
+
+&lt;p&gt;$ \sum_{pixel=1}^{NPIXELS} abs(original[pixel] - Generated[pixel]) $&lt;/p&gt;
+
+&lt;p&gt;I tried squaring. squaring increases error distance. So fitter drawings would have a higher chance of being selected.&lt;/p&gt;
+
+&lt;p&gt;$ \sum_{pixel=1}^{NPIXELS} (original[pixel] - Generated[pixel])^2 $&lt;/p&gt;
+
+&lt;p&gt;and it worked (sort of. from an artistic point of view)!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/me.jpg&quot; alt=&quot;ga&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I used this code to generate a lot of images, of different shapes.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/star.jpg&quot; alt=&quot;ga&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;My eventual plans were to create a bot which tweets these images. I even wrote a small program that gets a random Picassa image and bezierifies it. Unfortunately, &lt;a href=&quot;https://twitter.com/primitivepic&quot;&gt;someone else&lt;/a&gt; has already done it. And it’s much better than mine. But I learned a lot doing this project.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 01 Oct 2016 00:00:00 +0000</pubDate>
+        <link>http://localhost:4000/algorithm/2016/10/01/genetic.html</link>
+        <guid isPermaLink="true">http://localhost:4000/algorithm/2016/10/01/genetic.html</guid>
+        
+        
+        <category>algorithm</category>
+        
+      </item>
+    
+      <item>
+        <title>Simulated Annealing for Beautiful Graphs</title>
+        <description>&lt;p&gt;Humans have an intuitive sense of symmetry and aesthetics. We try our best to make it easy to understand the concept we’re trying to explain.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/uploads/unnamed-1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In textbooks, we see images like the one above, and not like this one..&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/polbooks_fr.png&quot; alt=&quot;-&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’m having labs in college where I have to implement various algorithms on graphs. The first step, however, was to draw one. The Random approach was the easiest. Randomly plot N Nodes anywhere in the screen, and connect them. If you’re lucky, your graph might look good. Mostly they didn’t.&lt;/p&gt;
+
+&lt;p&gt;There were people who tried this interesting approach: Given, N Nodes, arrange them in a Circle: with ‘360/N’ angular separation. Given the center, angle &amp;amp; radius can be easily converted to X, Y using basic trigonometry.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/circular.jpg&quot; alt=&quot;-&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This was good. But we could do better. I searched for the best way to do this, and ended up reading &lt;a href=&quot;http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.20.5663&quot;&gt;this&lt;/a&gt; paper&lt;/p&gt;
+
+&lt;p&gt;I think this is a pirated version of this paper because this is a Bad Scan and doesn’t look official at all. Also, I see another version &lt;a href=&quot;https://dl.acm.org/citation.cfm?id=234538&quot;&gt;here&lt;/a&gt; in ACM’s Library behind a paywall.&lt;/p&gt;
+
+&lt;p&gt;Anyway, The paper promised to take graphs from (a) to (b) using a method called (Simulated Annealing)[https://en.wikipedia.org/wiki/Simulated_annealing].&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/sample.png&quot; alt=&quot;-&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The paper defines the characteristics of a good drawing such as Evenly distributed nodes, edges having approximately the same lengths, minimal edge crossing, and Symmetry. Oh, and fitting snugly inside the window you’re drawing.&lt;/p&gt;
+
+&lt;p&gt;SA is derived from a Metallurgical process called Annealing, used to turn liquids to their crystalline form. Probability with which a system changes from one energy state to the next is&lt;/p&gt;
+
+&lt;p&gt;$\Huge e^{-\frac{E_2 - E_1}{kT}}$&lt;/p&gt;
+
+&lt;p&gt;This rule implied that whenever the energy $ E_2 $ of the candidate state is smaller than the current energy $ E_1 $, the system will take the move, else the state change is probabilistic.&lt;/p&gt;
+
+&lt;p&gt;A rough algorithm for SA is as follows:&lt;/p&gt;
+
+&lt;p&gt;Choose an initial configuration $ \sigma $ and an initial temperature $ T $&lt;/p&gt;
+
+&lt;p&gt;Repeat the following (usually some fixed number of times):&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Choose an initial configuration $ \sigma $ and an initial temperature $ T $&lt;/li&gt;
+  &lt;li&gt;
+    &lt;dl&gt;
+      &lt;dt&gt;Repeat the following (usually some fixed number of times):&lt;/dt&gt;
+      &lt;dd&gt;2.1 Choose new configuration $ \sigma’ $ from the neighborhood of $ \sigma $&lt;/dd&gt;
+      &lt;dd&gt;2.2 Let $ E $ and $ E’ $ be the value of the cost function at $ \sigma $ and $ \sigma’ $ respectively&lt;/dd&gt;
+      &lt;dd&gt;2.3 If $ E’ $ &amp;lt; $ E $ or $ random(0,1) &amp;lt; e^{(E - E’)/T)} $ the set $ \sigma $ to $ \sigma’ $&lt;/dd&gt;
+      &lt;dd&gt;2.4 Decrease Temperature $ T $&lt;/dd&gt;
+    &lt;/dl&gt;
+  &lt;/li&gt;
+  &lt;li&gt;If Termination rule is satisfied, stop. else go back to step 2&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The algorithm takes in an adjacency list representation of our graph, and should hopefully return coordinates of our graph nodes that look good. We chose an initial set of random coordinates for every node. Our energy function should be designed in such a way that a ‘nicer’ configuration should have a lower energy state. We talked about the characteristics of a good graph, but here are them again in detail.&lt;/p&gt;
+
+&lt;h2 id=&quot;node-distribution&quot;&gt;Node distribution&lt;/h2&gt;
+
+&lt;p&gt;Our nodes should be evenly spread across the window. Two components of the energy function
+take care of this. One to prevent nodes from getting too close. Second deals with window borders.&lt;/p&gt;
+
+&lt;p&gt;We add $ a_{ij} $ Energy function. if $ d_{ij} $ is the distance of node i to j&lt;/p&gt;
+
+&lt;p&gt;$a_{ij} = \frac{\lambda_1}{d_{ij}^2}$&lt;/p&gt;
+
+&lt;p&gt;This looks similar to the Electric Potential function. Lambda is a normalizing factor to define the importance of this particular criteria.&lt;/p&gt;
+
+&lt;h2 id=&quot;window-edges&quot;&gt;Window Edges&lt;/h2&gt;
+
+&lt;p&gt;The energy function for Window Edges bases itself of the distance between node and Window Edges&lt;/p&gt;
+
+&lt;p&gt;$m_i = \lambda_2 ( \frac{1}{r^2_i} + \frac{1}{l^2_i} + \frac{1}{t^2_i} + \frac{1}{b^2_i})$&lt;/p&gt;
+
+&lt;p&gt;Where $ r_i $,$ l_i $,$ t_i $ &amp;amp; $ b_i $ are the distances of node i to right, left, top and bottom window edges.
+This ensures that nodes are prevented from getting too close to window border.&lt;/p&gt;
+
+&lt;h2 id=&quot;edge-lengths&quot;&gt;Edge lengths&lt;/h2&gt;
+
+&lt;p&gt;we try to shorten edge lengths but not make the graph too crowded. For each edge $ k $ we add the term&lt;/p&gt;
+
+&lt;p&gt;$ c_k = \lambda_3d_{k}^2 $&lt;/p&gt;
+
+&lt;p&gt;These 3 criteria are enough for most graphs, but they won’t look good on all graphs.
+So we’ll take a look at edge crossings and node to edge distances&lt;/p&gt;
+
+&lt;h2 id=&quot;edge-crossing&quot;&gt;Edge crossing&lt;/h2&gt;
+
+&lt;p&gt;We prevent edge crossing simply by adding an extra $ \lambda_4 $ for every edge that crosses&lt;/p&gt;
+
+&lt;h2 id=&quot;node-to-edge-sides&quot;&gt;Node to edge sides&lt;/h2&gt;
+
+&lt;p&gt;Edges may get too close to a node. Mostly this is taken care by rest of the function, but adding this extra energy covers more cases&lt;/p&gt;
+
+&lt;p&gt;$ h_{kl} = \frac{\lambda_5}{g_{kl}^2} $&lt;/p&gt;
+
+&lt;p&gt;There is an additional minimum distance rule in the paper, which I ignored for my code as it
+was working neatly without it. After every step of energy change, The temperature should be reduced. We follow this rule:&lt;/p&gt;
+
+&lt;p&gt;$ T’ = \lambda T $&lt;/p&gt;
+
+&lt;p&gt;with $ \lambda $ between 0.6 and 0.95.&lt;/p&gt;
+
+&lt;p&gt;Here is an 8x speedup video of my implementation on Turbo C++.&lt;/p&gt;
+
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/BHHFM5IoAT4&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;I did this mostly in a small laptop which didn’t belong to me at the time, and I hence lost most of the code.
+I’m looking forward to re implementing it here in Javascript so that anyone can play around with it :)&lt;/p&gt;
+</description>
+        <pubDate>Wed, 01 Oct 2014 00:00:00 +0000</pubDate>
+        <link>http://localhost:4000/algorithm/2014/10/01/simulated-annealing.html</link>
+        <guid isPermaLink="true">http://localhost:4000/algorithm/2014/10/01/simulated-annealing.html</guid>
+        
+        
+        <category>algorithm</category>
+        
+      </item>
+    
+      <item>
+        <title>Blender Renders</title>
+        <description>&lt;p&gt;The Particle Collision project got me interested in Blender. Over the course of many years, I did several Renders.&lt;/p&gt;
+
+&lt;blockquote class=&quot;instagram-media&quot; data-instgrm-captioned=&quot;&quot; data-instgrm-permalink=&quot;https://www.instagram.com/p/5THLj4QYwc/?utm_source=ig_embed&amp;amp;utm_campaign=loading&quot; data-instgrm-version=&quot;12&quot; style=&quot; background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);&quot;&gt;&lt;div style=&quot;padding:16px;&quot;&gt; &lt;a href=&quot;https://www.instagram.com/p/5THLj4QYwc/?utm_source=ig_embed&amp;amp;utm_campaign=loading&quot; style=&quot; background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;&quot; target=&quot;_blank&quot;&gt; &lt;div style=&quot; display: flex; flex-direction: row; align-items: center;&quot;&gt; &lt;div style=&quot;background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;&quot;&gt;&lt;/div&gt; &lt;div style=&quot;display: flex; flex-direction: column; flex-grow: 1; justify-content: center;&quot;&gt; &lt;div style=&quot; background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;&quot;&gt;&lt;/div&gt; &lt;div style=&quot; background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div style=&quot;padding: 19% 0;&quot;&gt;&lt;/div&gt; &lt;div style=&quot;display:block; height:50px; margin:0 auto 12px; width:50px;&quot;&gt;&lt;svg width=&quot;50px&quot; height=&quot;50px&quot; viewBox=&quot;0 0 60 60&quot; version=&quot;1.1&quot; xmlns=&quot;https://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;https://www.w3.org/1999/xlink&quot;&gt;&lt;g stroke=&quot;none&quot; stroke-width=&quot;1&quot; fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;&gt;&lt;g transform=&quot;translate(-511.000000, -20.000000)&quot; fill=&quot;#000000&quot;&gt;&lt;g&gt;&lt;path d=&quot;M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631&quot;&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div style=&quot;padding-top: 8px;&quot;&gt; &lt;div style=&quot; color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;&quot;&gt; View this post on Instagram&lt;/div&gt;&lt;/div&gt;&lt;div style=&quot;padding: 12.5% 0;&quot;&gt;&lt;/div&gt; &lt;div style=&quot;display: flex; flex-direction: row; margin-bottom: 14px; align-items: center;&quot;&gt;&lt;div&gt; &lt;div style=&quot;background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(0px) translateY(7px);&quot;&gt;&lt;/div&gt; &lt;div style=&quot;background-color: #F4F4F4; height: 12.5px; transform: rotate(-45deg) translateX(3px) translateY(1px); width: 12.5px; flex-grow: 0; margin-right: 14px; margin-left: 2px;&quot;&gt;&lt;/div&gt; &lt;div style=&quot;background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(9px) translateY(-18px);&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 8px;&quot;&gt; &lt;div style=&quot; background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 20px; width: 20px;&quot;&gt;&lt;/div&gt; &lt;div style=&quot; width: 0; height: 0; border-top: 2px solid transparent; border-left: 6px solid #f4f4f4; border-bottom: 2px solid transparent; transform: translateX(16px) translateY(-4px) rotate(30deg)&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: auto;&quot;&gt; &lt;div style=&quot; width: 0px; border-top: 8px solid #F4F4F4; border-right: 8px solid transparent; transform: translateY(16px);&quot;&gt;&lt;/div&gt; &lt;div style=&quot; background-color: #F4F4F4; flex-grow: 0; height: 12px; width: 16px; transform: translateY(-4px);&quot;&gt;&lt;/div&gt; &lt;div style=&quot; width: 0; height: 0; border-top: 8px solid #F4F4F4; border-left: 8px solid transparent; transform: translateY(-4px) translateX(8px);&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/a&gt; &lt;p style=&quot; margin:8px 0 0 0; padding:0 4px;&quot;&gt; &lt;a href=&quot;https://www.instagram.com/p/5THLj4QYwc/?utm_source=ig_embed&amp;amp;utm_campaign=loading&quot; style=&quot; color:#000; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none; word-wrap:break-word;&quot; target=&quot;_blank&quot;&gt;Found new hobby. 3D modeling. This is a model I&amp;#39;ve been working on from my college days. Decided to complete it, now that I&amp;#39;ve graduated. This model is seriously inaccurate, given that I drew it mostly from memory and photographs. Worth a shot. College of Engineering Trivandrum. #cet #blender #architecture #design&lt;/a&gt;&lt;/p&gt; &lt;p style=&quot; color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;&quot;&gt;A post shared by &lt;a href=&quot;https://www.instagram.com/at.vk/?utm_source=ig_embed&amp;amp;utm_campaign=loading&quot; style=&quot; color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px;&quot; target=&quot;_blank&quot;&gt; Atul Vinayak&lt;/a&gt; (@at.vk) on &lt;time style=&quot; font-family:Arial,sans-serif; font-size:14px; line-height:17px;&quot; datetime=&quot;2015-07-19T01:04:48+00:00&quot;&gt;Jul 18, 2015 at 6:04pm PDT&lt;/time&gt;&lt;/p&gt;&lt;/div&gt;&lt;/blockquote&gt;
+&lt;script async=&quot;&quot; src=&quot;//www.instagram.com/embed.js&quot;&gt;&lt;/script&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;A Solar Sailer to Mars.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b9.jpg&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;A Portable TV. I did’nt model this. Just did the shading and reflections.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b8.jpg&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The Three images below are wierd. I know. Polyhedra, The Penrose Triangle and a Hypercube.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b7.png&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b6.png&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b5.png&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=b75EpoF1W88&quot;&gt;2001: ASO&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b4.jpg&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=TSaO9VGjLXc&quot;&gt;The Machine&lt;/a&gt; from Contact I got appreciation for this in reddit from a student of the Professor who worked on the VFX for the movie 😊. This image shows up in google images now when you search “Contact Machine”&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b3.jpg&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;This one is based on a Dream I once had. Had to learn Volumetric lighting to render this.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b2.png&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Just a Fog &amp;amp; Sunshine experiment.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b1.jpg&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Same image, but with volumetric lighting. but a bit too noisy.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/b0.jpg&quot; alt=&quot;My helpful screenshot&quot; /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Fri, 20 Dec 2013 00:00:00 +0000</pubDate>
+        <link>http://localhost:4000/design/2013/12/20/blender.html</link>
+        <guid isPermaLink="true">http://localhost:4000/design/2013/12/20/blender.html</guid>
+        
+        
+        <category>design</category>
+        
+      </item>
+    
+  </channel>
+</rss>
