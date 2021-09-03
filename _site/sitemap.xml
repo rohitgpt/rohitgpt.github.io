@@ -1,36 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
-    
-    <url>
-      <loc>http://localhost:4000/algorithms/programming/2021/02/19/finding-mona-lisa-in-the-game-of-life.html/</loc>
-      
-        <lastmod>2021-02-19T15:00:00+00:00</lastmod>
-      
-      
-        <changefreq>monthly</changefreq>
-      
-      
-        <priority>0.7</priority>
-      
-    </url>
-    
-  
-    
-    <url>
-      <loc>http://localhost:4000/art/2021/01/09/noise-planets.html/</loc>
-      
-        <lastmod>2021-01-09T03:00:00+00:00</lastmod>
-      
-      
-        <changefreq>monthly</changefreq>
-      
-      
-        <priority>0.7</priority>
-      
-    </url>
-    
-  
   
     
   
@@ -38,7 +8,7 @@
     <url>
       <loc>http://localhost:4000/about/</loc>
       
-        <lastmod>2021-09-03T07:20:56+00:00</lastmod>
+        <lastmod>2021-09-03T07:29:51+00:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -53,7 +23,7 @@
     <url>
       <loc>http://localhost:4000/categories/bio/</loc>
       
-        <lastmod>2021-09-03T07:20:56+00:00</lastmod>
+        <lastmod>2021-09-03T07:29:51+00:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -70,7 +40,7 @@
     <url>
       <loc>http://localhost:4000/</loc>
       
-        <lastmod>2021-09-03T07:20:56+00:00</lastmod>
+        <lastmod>2021-09-03T07:29:51+00:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -87,7 +57,7 @@
     <url>
       <loc>http://localhost:4000/categories/ml/</loc>
       
-        <lastmod>2021-09-03T07:20:56+00:00</lastmod>
+        <lastmod>2021-09-03T07:29:51+00:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -102,7 +72,7 @@
     <url>
       <loc>http://localhost:4000/categories/phil/</loc>
       
-        <lastmod>2021-09-03T07:20:56+00:00</lastmod>
+        <lastmod>2021-09-03T07:29:51+00:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -117,7 +87,7 @@
     <url>
       <loc>http://localhost:4000/categories/programming/</loc>
       
-        <lastmod>2021-09-03T07:20:56+00:00</lastmod>
+        <lastmod>2021-09-03T07:29:51+00:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -136,7 +106,7 @@
     <url>
       <loc>http://localhost:4000/categories/web3/</loc>
       
-        <lastmod>2021-09-03T07:20:56+00:00</lastmod>
+        <lastmod>2021-09-03T07:29:51+00:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
