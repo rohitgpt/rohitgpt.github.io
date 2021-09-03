@@ -8,16 +8,16 @@ collections:
   uploads:
     title: Uploads
     output: true
-description: 'Atul''s Programming Journals. A blog where I explore programming & Design
+description: 'Rohit''s Journals.
 
 '
 baseurl: ''
-url: http://avinayak.github.io
+url: http://rohitgpt.github.io
 author:
-  fullname: Atul Vinayak
-  github: avinayak
-  twitter: atulvinayak
-  unsplash: atulvi
+  fullname: Rohit Gupta
+  github: rohitgpt
+  twitter: krullun  
+  unsplash: krullun 
 highlightstyle: github-gist
 styles:
 - agate
