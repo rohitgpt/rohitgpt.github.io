@@ -10,7 +10,7 @@ subtitle: with JAX
 With recent changes on Binance platforms forcing users to verify their account in order to transfer funds from Wazirx account, withdrawals [fees](https://wazirx.com/fees) becomes important. Wazirx withdrawal fees varies widely for different currencies. 
 Also note that if you are using some token transfer funds, do keep in minds that token requires the underlying chain currency for transfers. For examples, transferring BTT would require you to also have TRX in your cryptocurrency wallet as the BTT is natively built on Tron.
 
-You can find the update withdrawal fees below in USDT:
+You can find the update withdrawal fees below in USDT.
 Note: USDT rates are taken from Wazirx at the time of updating this article.
 
 | Currency   |   Withdrawal Fees (USDT) |
