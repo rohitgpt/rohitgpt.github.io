@@ -1,10 +1,10 @@
 ---
-title: Wazrix Withdrawal Fees
+title: Transfer funds from Wazirx to Binance
 categories:
 - web3
 - programming
 layout: post
-subtitle: with JAX
+subtitle: Wazirx Withdrawal Fees 
 
 ---
 From September 1st, 2021, Binance users must to verify their account to transfer funds directly from the Wazirx account. Apart from the fact, Binance is based in China, this goes against the ethos of anonymity that many associate the cryptocurrency movement with. The only other option available is to withdraw funds as cryptocurrency from Wazirx and then deposit them in the Binance account. But withdrawals on Wazirx are some of the most expensive in the industry. That said, some currencies have almost zero [fees](https://wazirx.com/fees). You can find the updated withdrawal fees below in USDT.
@@ -13,7 +13,7 @@ Note: USDT rates are taken from Wazirx at the time of updating this article.
 Also note that if you are using some token transfer funds, do keep in minds that token requires the underlying chain currency for transfers. For examples, transferring BTT would require you to also have TRX in your cryptocurrency wallet as the BTT is natively built on Tron.
 
 
-| Currency   |   Withdrawal Fees (USDT) |
+| Currency   |  Fees (USDT) |
 |:-----------|-------------------------:|
 | btt        |                     0    |
 | ncash      |                     0    |
