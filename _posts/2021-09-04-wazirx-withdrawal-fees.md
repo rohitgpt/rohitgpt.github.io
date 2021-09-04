@@ -11,7 +11,7 @@ With recent changes on Binance platforms forcing users to verify their account i
 Also note that if you are using some token transfer funds, do keep in minds that token requires the underlying chain currency for transfers. For examples, transferring BTT would require you to also have TRX in your cryptocurrency wallet as the BTT is natively built on Tron.
 
 You can find the update withdrawal fees below in USDT:
-<cap> Note: USDT rates are taken from Wazirx at the time of updating this article. </cap>
+Note: USDT rates are taken from Wazirx at the time of updating this article.
 
 | Currency   |   Withdrawal Fees (USDT) |
 |:-----------|-------------------------:|
