@@ -4,7 +4,7 @@ categories:
 - web3
 - programming
 layout: post
-subtitle: Wazirx Withdrawal Fees 
+subtitle: Wazirx Withdrawal Fees
 
 ---
 From September 1st, 2021, Binance users must to verify their account to transfer funds directly from the Wazirx account. Apart from the fact, Binance is based in China, this goes against the ethos of anonymity that many associate the cryptocurrency movement with. The only other option available is to withdraw funds as cryptocurrency from Wazirx and then deposit them in the Binance account. But withdrawals on Wazirx are some of the most expensive in the industry. That said, some currencies have almost zero [fees](https://wazirx.com/fees). You can find the updated withdrawal fees below in USDT.
@@ -63,3 +63,5 @@ Also note that if you are using some token transfer funds, do keep in minds that
 | Ethereum (ETH)                            |       3920.43 |
 | DFI.Money (YFII)                          |       5641.5  |
 | Bitcoin (BTC)                             |      50250.5  |
+
+
