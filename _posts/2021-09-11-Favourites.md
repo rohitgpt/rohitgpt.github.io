@@ -1,12 +1,21 @@
 ---
-title: Transfer funds from Wazirx to Binance
+title: Favorite's
 categories:
 - Misc
 layout: post
 subtitle: Investor and Inventors and Everything in between
 ---
 
-  
+## Founders
+
+1. Vitalik Buterin - *Ethereum*
+2. Jack Dorsey - *Twitter*
+
+
+## Programmers
+
+1. Andrej Karparthy - [https://karparthy.github.io]
+
 
 ## Actors
 
@@ -22,12 +31,10 @@ subtitle: Investor and Inventors and Everything in between
 10. Christian Bale - *The Dark Knight (2008)*
 11. Daniel Radcliffe - *Harry Potter*
 12. Matt Damon - *Good Will Hunting (1997)*
-13. Ethan Hawke - *Before Sunrise (1995)*
-
- 
-  
+13. Ethan Hawke - *Before Sunrise (1995)* 
 
 ## Actresses
 
----
+
+-----	
 Work in Progress
