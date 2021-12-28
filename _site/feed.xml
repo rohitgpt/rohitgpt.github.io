@@ -4,11 +4,232 @@
     <title>¬</title>
     <description>Rohit's Journals.
 </description>
-    <link>http://localhost:4000/</link>
-    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 03 Sep 2021 07:43:16 +0000</pubDate>
-    <lastBuildDate>Fri, 03 Sep 2021 07:43:16 +0000</lastBuildDate>
-    <generator>Jekyll v4.0.0</generator>
+    <link>http://rohitgpt.github.io/</link>
+    <atom:link href="http://rohitgpt.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sat, 04 Sep 2021 07:47:58 +0000</pubDate>
+    <lastBuildDate>Sat, 04 Sep 2021 07:47:58 +0000</lastBuildDate>
+    <generator>Jekyll v4.2.0</generator>
+    
+      <item>
+        <title>Transfer funds from Wazirx to Binance</title>
+        <description>&lt;p&gt;From September 1st, 2021, Binance users must to verify their account to transfer funds directly from the Wazirx account. Apart from the fact, Binance is based in China, this goes against the ethos of anonymity that many associate the cryptocurrency movement with. The only other option available is to withdraw funds as cryptocurrency from Wazirx and then deposit them in the Binance account. But withdrawals on Wazirx are some of the most expensive in the industry. That said, some currencies have almost zero &lt;a href=&quot;https://wazirx.com/fees&quot;&gt;fees&lt;/a&gt;. You can find the updated withdrawal fees below in USDT.&lt;/p&gt;
+
+&lt;p&gt;Note: USDT rates are taken from Wazirx at the time of updating this article.
+Also note that if you are using some token transfer funds, do keep in minds that token requires the underlying chain currency for transfers. For examples, transferring BTT would require you to also have TRX in your cryptocurrency wallet as the BTT is natively built on Tron.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Currency&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;Fees (USDT)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;BitTorrent (BTT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nucleus Vision (NCASH)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Dent (DENT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Holo (HOT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;FunFair (FUN)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.03&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;QuarkChain Token (QKC)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.03&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;StormX (STMX)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.04&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Tron (TRX)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Status Network (SNT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.11&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Dusk Network (DUSK)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.19&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Request Network (REQ)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.24&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Stellar (XLM)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.37&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;COTI (COTI)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.38&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Loopring (LRC)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.52&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;AdEx Network (ADX)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.58&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Cartesi (CTSI)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.83&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Basic Attention Token (BAT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;0.91&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;BUSD (BUSD)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Paxos Standard Token (PAX)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;USD Coin (USDC)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Sandbox (SAND)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x Protocol (ZRX)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.19&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;UniLend (UFT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.24&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;pNetwork (PNT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.28&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Ripple (XRP)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.28&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Frontier (FRONT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.31&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Matic Network (MATIC)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.47&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;WazirX Token (WRX)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.47&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Storj (STORJ)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1.75&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1inch (1INCH)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3.58&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Travala.com (AVA)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Swipe (SXP)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3.74&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Ethereum Push Notification Service (PUSH)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;4.61&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Easy V2 (EZ)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;6.57&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;OmiseGO (OMG)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;7.04&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Serum (SRM)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;9.13&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;UMA (UMA)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;13.08&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Tether USD (USDT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;20&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Uniswap (UNI)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;28.89&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;FTX Token (FTT)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;64.11&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Cream Finance (CREAM)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;169.08&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Bitcoin Cash SV (BCHSV)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;180.12&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Litecoin (LTC)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;213.96&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Binance Coin (BNB)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;492.1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Maker (MKR)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3695.11&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Ethereum (ETH)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3920.43&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;DFI.Money (YFII)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;5641.5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Bitcoin (BTC)&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;50250.5&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</description>
+        <pubDate>Sat, 04 Sep 2021 00:00:00 +0000</pubDate>
+        <link>http://rohitgpt.github.io/web3/programming/2021/09/04/wazirx-withdrawal-fees.html</link>
+        <guid isPermaLink="true">http://rohitgpt.github.io/web3/programming/2021/09/04/wazirx-withdrawal-fees.html</guid>
+        
+        
+        <category>web3</category>
+        
+        <category>programming</category>
+        
+      </item>
     
   </channel>
 </rss>
